@@ -1,0 +1,62 @@
+Hadoop
+
+public static class MyMapper extends Mapper<in_1, in_2, out_1, out_2> {
+	@Override
+	protected void map(in_1 key, in_2 value, Context context) throws IOException, InterruptedException {
+		...
+		context.write(out_1_instance, out_2_instance);
+		...
+	}
+}
+
+public static class MyReducer extends Reducer<in_1, in_2, out_1, out_2> {
+	@Override
+	protected void reduce(in_1 key, Iterative<in_2> values, Context context) throws IOException, InterruptedException {
+		...
+		context.write(out_1_instance, out_2_instance);
+		..
+	}
+}
+
+job.setMapperClass(MyMapper.class);
+job.setReducerClass(MyReducer.class);
+job.waitForCompletion(true);
+
+Spark
+
+// assume spark context is sc
+JavaRDD<String> inputs = sc.textFile("filename");
+JavaRDD<String> words = inputs.flatMap(new FlatMapFunction<String, String> {
+	@Override
+	public iterator<String> call(String input) throws Exception {
+		...
+		return ...
+	}
+}
+JavaPairRDD<String, Integer> word_pair = words.mapToPair(new PairFunction<String, String, Integer> {
+	@Override
+	public Tuple2<String, Integer> call(String input) throws Exception {
+		...
+		return ...
+	}
+}
+JavaPairRDD<String, Integer> counts = word_pair.groupByKey().mapToPair(new PairFunction<Tuple2<String, Iterative<Integer>>, String, Integer> {
+	@Override
+	public Tuple2<String, Integer> call (Tuple2<String, Iterative<Integer>> s) throws Exception {
+		...
+		return ...
+	}
+}
+JavaPairRDD<String, Integer> sorted = counts.mapToPair(new PairFunction<Tuple2<String, Integer>, Integer, String> {
+	@Override
+	public Tuple2<Integer, String> call (Tuple2<String, Integer> s) throws Exception {
+		...
+		return ...
+	}
+}.sortByKey(new IntComparator()).mapToPair(new PairFunction<Tuple2<Integer, String>, String, Integer> {
+	@Override
+	public Tuple2<String, Integer> call (Tuple2<Integer, String> s) throws Exception {
+		...
+		return ...
+	}
+}.saveAsTextFile("targetFileName");

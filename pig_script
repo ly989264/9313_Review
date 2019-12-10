@@ -1,0 +1,14 @@
+# WordCount
+lines = LOAD 'inputfilename' as (line:chararray);  // lines: {line: chararray}
+words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) as word;  // words: {word: chararray}
+groups = GROUP words by word;  // groups: {group: word, words:{(word:chararray)}}
+counts = FOREACH groups GENERATE group as word, count(words) as count;  // counts: {word: chararray, count: long}
+result = ORDER counts by count DESC;  // result: {word: chararray, count: long}
+
+# TableJoin
+students = LOAD 'studentfilename' USING PigStorage(',') as (zid:chararray, name:chararray);  // students: {zid: chararray, name: chararray}
+marks = LOAD 'marksfilename' USING PigStorage(',') as (zid:chararray, m1:int, m2:int);  // marks: {zid: chararray, m1: int, m2: int}
+joined = JOIN students by zid, marks by zid;  // joined: {students::zid:chararray, students::name:chararray, marks::zid:chararray, marks::m1:int, marks::m2:int}
+result = FOREACH joined GENERATE students::zid as zid, students::name as name, marks::m1 as m1, marks::m2 as m2;  // result: {zid:chararray, name:chararray, m1:int, m2:int}
+
+
