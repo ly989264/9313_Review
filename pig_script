@@ -1,7 +1,7 @@
 # WordCount
 lines = LOAD 'inputfilename' as (line:chararray);  // lines: {line: chararray}
 words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) as word;  // words: {word: chararray}
-groups = GROUP words by word;  // groups: {group: word, words:{(word:chararray)}}
+groups = GROUP words by word;  // groups: {group: chararray, words:{(word:chararray)}}
 counts = FOREACH groups GENERATE group as word, count(words) as count;  // counts: {word: chararray, count: long}
 result = ORDER counts by count DESC;  // result: {word: chararray, count: long}
 
